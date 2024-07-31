@@ -165,13 +165,25 @@
             max-width: 600px;
             margin: 20px auto;
         }
+        #toggleCameraButton {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
     </style>
     <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
     <h1>Evento - Registrazione Ospiti</h1>
     <h2>Scansiona i QR code dei tuoi ospiti</h2>
-    <div id="qr-reader"></div>
+    <button id="toggleCameraButton">Attiva Fotocamera</button>
+    <div id="qr-reader" style="display: none;"></div>
     <input type="text" id="scannedText" placeholder="QR Code">
     <div id="counterContainer">
         <button id="exportButton">Esporta in Excel</button>
@@ -216,21 +228,43 @@
         const cancelNoteButton = document.getElementById('cancelNoteButton');
         const confirmButton = document.getElementById('confirmButton');
         const cancelButton = document.getElementById('cancelButton');
+        const toggleCameraButton = document.getElementById('toggleCameraButton');
+        const qrReader = document.getElementById('qr-reader');
         let guestList = JSON.parse(localStorage.getItem('guestList')) || [];
         let guestCount = guestList.length;
         let guestToDelete = null;
         let guestToAddNote = null;
+        let cameraActive = false;
+        let qrScanner;
 
-        // Initialize QR Scanner
         function onScanSuccess(decodedText, decodedResult) {
             handleScannedData(decodedText);
         }
-        
-        let qrScanner = new Html5QrcodeScanner(
-            "qr-reader", 
-            { fps: 10, qrbox: 250 },
-            /* verbose= */ false);
-        qrScanner.render(onScanSuccess);
+
+        function startScanner() {
+            qrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
+            qrScanner.render(onScanSuccess);
+        }
+
+        function stopScanner() {
+            if (qrScanner) {
+                qrScanner.clear();
+                qrScanner = null;
+            }
+        }
+
+        toggleCameraButton.addEventListener('click', function() {
+            if (cameraActive) {
+                stopScanner();
+                qrReader.style.display = 'none';
+                toggleCameraButton.textContent = 'Attiva Fotocamera';
+            } else {
+                startScanner();
+                qrReader.style.display = 'block';
+                toggleCameraButton.textContent = 'Disattiva Fotocamera';
+            }
+            cameraActive = !cameraActive;
+        });
 
         // Initialize guest list and count
         guestCountSpan.textContent = guestCount;
