@@ -235,21 +235,33 @@
         let guestToDelete = null;
         let guestToAddNote = null;
         let cameraActive = false;
-        let qrScanner;
+        let html5QrCode;
 
         function onScanSuccess(decodedText, decodedResult) {
             handleScannedData(decodedText);
         }
 
         function startScanner() {
-            qrScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 }, false);
-            qrScanner.render(onScanSuccess);
+            html5QrCode = new Html5Qrcode("qr-reader");
+            html5QrCode.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                onScanSuccess)
+            .catch(err => {
+                console.error(`Error starting QR code scanner: ${err}`);
+            });
         }
 
         function stopScanner() {
-            if (qrScanner) {
-                qrScanner.clear();
-                qrScanner = null;
+            if (html5QrCode) {
+                html5QrCode.stop().then(ignore => {
+                    html5QrCode.clear();
+                }).catch(err => {
+                    console.error(`Error stopping QR code scanner: ${err}`);
+                });
             }
         }
 
@@ -443,3 +455,4 @@
     </script>
 </body>
 </html>
+
