@@ -1,18 +1,125 @@
 <!DOCTYPE html>
-<html>
+<html lang="it">
 <head>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scanner QR Code</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #video {
+            width: 220px;
+            height: 220px;
+            border: 2px solid #4CAF50;
+            margin-bottom: 20px;
+            object-fit: cover;
+        }
+        #output {
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            width: 80%;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .qr-text {
+            margin: 5px 0;
+        }
+    </style>
 </head>
 <body>
-  <div id="qr-reader" style="width:500px"></div>
-  <script>
-    var resultContainer = document.getElementById('qr-reader-results');
-    function onScanSuccess(decodedText, decodedResult) {
-      google.script.run.getQRCode(decodedText); 
-      google.script.host.close();
-    }
-    var html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: 250 });
-    html5QrcodeScanner.render(onScanSuccess);
-  </script>
+    <h1>Scanner QR Code</h1>
+    <button id="startButton">Attiva Fotocamera</button>
+    <video id="video" playsinline></video>
+    <div id="output">Scansiona un codice QR...</div>
+    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
+    <script>
+        const qrCodes = [];
+        let scanning = false;
+        let codeReader;
+
+        document.getElementById('startButton').addEventListener('click', async () => {
+            const constraints = {
+                video: {
+                    facingMode: { exact: "environment" }
+                }
+            };
+
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoElement = document.getElementById('video');
+                videoElement.srcObject = stream;
+
+                if (codeReader) {
+                    codeReader.reset();
+                } else {
+                    codeReader = new ZXing.BrowserQRCodeReader();
+                }
+
+                const outputElement = document.getElementById('output');
+                const beepSound = document.getElementById('beepSound');
+
+                console.log("Inizio scansione QR code");
+                codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                    if (result && !scanning) {
+                        scanning = true;
+                        console.log("QR code rilevato:", result.text);
+                        beepSound.play();
+                        navigator.vibrate(200);
+                        qrCodes.unshift(result.text);
+                        updateOutput();
+                        setTimeout(() => scanning = false, 3000);
+                    }
+                    if (err) {
+                        if (err instanceof ZXing.NotFoundException) {
+                            console.log("Nessun QR code trovato in questo frame.");
+                        } else {
+                            console.error("Errore nella scansione del codice QR:", err);
+                        }
+                    }
+                }).catch(err => {
+                    console.error("Errore nella decodifica dal dispositivo video:", err);
+                    outputElement.textContent = 'Errore nella configurazione dello scanner QR.';
+                });
+
+            } catch (error) {
+                console.error('Errore nell\'attivazione della fotocamera:', error);
+                document.getElementById('output').textContent = 'Errore nell\'attivazione della fotocamera.';
+            }
+        });
+
+        function updateOutput() {
+            const outputElement = document.getElementById('output');
+            outputElement.innerHTML = '';
+            qrCodes.forEach((code, index) => {
+                const div = document.createElement('div');
+                div.className = 'qr-text';
+                div.textContent = `${qrCodes.length - index}. ${code}`;
+                outputElement.appendChild(div);
+            });
+        }
+    </script>
 </body>
 </html>
