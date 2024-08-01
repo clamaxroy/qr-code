@@ -17,19 +17,20 @@
             flex-direction: column;
         }
         #video {
-            width: 80%;
-            height: auto;
+            width: 80px;
+            height: 80px;
             border: 2px solid #4CAF50;
             margin-bottom: 20px;
+            object-fit: cover; /* Ensures the video fits within the given dimensions */
         }
         #output {
             padding: 20px;
             background: white;
             border: 1px solid #ddd;
             width: 80%;
-            text-align: left;
             max-height: 200px;
             overflow-y: auto;
+            text-align: left;
         }
         button {
             padding: 10px 20px;
@@ -40,6 +41,9 @@
         }
         button:hover {
             background-color: #45a049;
+        }
+        .qr-text {
+            margin: 5px 0;
         }
     </style>
 </head>
@@ -98,9 +102,10 @@
 
         function updateOutput() {
             const outputElement = document.getElementById('output');
-            outputElement.innerHTML = '';
+            outputElement.innerHTML = ''; // Clear the current content
             qrCodes.forEach((code, index) => {
                 const div = document.createElement('div');
+                div.className = 'qr-text';
                 div.textContent = `${index + 1}. ${code}`;
                 outputElement.appendChild(div);
             });
