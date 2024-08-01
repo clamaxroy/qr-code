@@ -17,8 +17,8 @@
             flex-direction: column;
         }
         #video {
-            width: 320px;
-            height: 320px;
+            width: 120px;
+            height: 120px;
             border: 2px solid #4CAF50;
             margin-bottom: 20px;
             object-fit: cover; /* Ensures the video fits within the given dimensions */
@@ -81,6 +81,7 @@
                         scanning = true; // Imposta la scansione in pausa
                         console.log("QR code rilevato:", result.text);
                         beepSound.play(); // Riproduci il suono
+                        navigator.vibrate(200); // Attiva la vibrazione per 200 ms
                         qrCodes.unshift(result.text); // Aggiungi il risultato all'inizio dell'array
                         updateOutput(); // Aggiorna il contenuto dell'output
                         setTimeout(() => scanning = false, 3000); // Riprendi la scansione dopo 3 secondi
@@ -106,11 +107,10 @@
             qrCodes.forEach((code, index) => {
                 const div = document.createElement('div');
                 div.className = 'qr-text';
-                div.textContent = `${index + 1}. ${code}`;
+                div.textContent = `${qrCodes.length - index}. ${code}`;
                 outputElement.appendChild(div);
             });
         }
     </script>
 </body>
 </html>
-
