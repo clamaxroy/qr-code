@@ -28,6 +28,8 @@
             border: 1px solid #ddd;
             width: 80%;
             text-align: center;
+            max-height: 200px;
+            overflow-y: auto;
         }
         button {
             padding: 10px 20px;
@@ -46,9 +48,12 @@
     <button id="startButton">Attiva Fotocamera</button>
     <video id="video" playsinline></video>
     <div id="output">Scansiona un codice QR...</div>
+    <audio id="beepSound" src="beep.mp3"></audio> <!-- Aggiungi il file audio "beep.mp3" -->
 
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
+        const qrCodes = []; // Array per salvare i testi dei QR code
+
         document.getElementById('startButton').addEventListener('click', async () => {
             const constraints = {
                 video: {
@@ -63,11 +68,13 @@
 
                 const codeReader = new ZXing.BrowserQRCodeReader();
                 const outputElement = document.getElementById('output');
+                const beepSound = document.getElementById('beepSound');
 
                 codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
                     if (result) {
-                        console.log("Risultato trovato:", result);
-                        outputElement.textContent = result.text;
+                        beepSound.play(); // Riproduci il suono
+                        qrCodes.unshift(result.text); // Aggiungi il risultato all'inizio dell'array
+                        outputElement.textContent = qrCodes.join('\n'); // Aggiorna il contenuto dell'output
                     }
                     if (err) {
                         if (err instanceof ZXing.NotFoundException) {
