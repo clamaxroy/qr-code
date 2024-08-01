@@ -17,11 +17,11 @@
             flex-direction: column;
         }
         #video {
-            width: 220px;
-            height: 220px;
+            width: 80px;
+            height: 80px;
             border: 2px solid #4CAF50;
             margin-bottom: 20px;
-            object-fit: cover;
+            object-fit: cover; /* Ensures the video fits within the given dimensions */
         }
         #output {
             padding: 20px;
@@ -44,7 +44,6 @@
         }
         .qr-text {
             margin: 5px 0;
-            word-break: break-all;
         }
     </style>
 </head>
@@ -53,31 +52,12 @@
     <button id="startButton">Attiva Fotocamera</button>
     <video id="video" playsinline></video>
     <div id="output">Scansiona un codice QR...</div>
-    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio> <!-- Recupera il suono dal link online -->
 
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
-        const qrCodes = [];
-        let scanning = false;
-        let codeReader;
-
-        function encrypt(text) {
-            // Simple encryption function (Caesar cipher for demonstration purposes)
-            const shift = 3;
-            return text.split('').map(char => {
-                const code = char.charCodeAt(0);
-                // Encrypt uppercase letters
-                if (code >= 65 && code <= 90) {
-                    return String.fromCharCode(((code - 65 + shift) % 26) + 65);
-                }
-                // Encrypt lowercase letters
-                else if (code >= 97 && code <= 122) {
-                    return String.fromCharCode(((code - 97 + shift) % 26) + 97);
-                }
-                // Return unmodified character
-                return char;
-            }).join('');
-        }
+        const qrCodes = []; // Array per salvare i testi dei QR code
+        let scanning = false; // Flag per controllare lo stato della scansione
 
         document.getElementById('startButton').addEventListener('click', async () => {
             const constraints = {
@@ -91,33 +71,23 @@
                 const videoElement = document.getElementById('video');
                 videoElement.srcObject = stream;
 
-                if (codeReader) {
-                    codeReader.reset();
-                } else {
-                    codeReader = new ZXing.BrowserQRCodeReader();
-                }
-
+                const codeReader = new ZXing.BrowserQRCodeReader();
                 const outputElement = document.getElementById('output');
                 const beepSound = document.getElementById('beepSound');
 
                 console.log("Inizio scansione QR code");
                 codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
                     if (result && !scanning) {
-                        scanning = true;
+                        scanning = true; // Imposta la scansione in pausa
                         console.log("QR code rilevato:", result.text);
-                        beepSound.play();
-                        navigator.vibrate(200);
-                        const encryptedCode = encrypt(result.text);
-                        qrCodes.unshift(encryptedCode);
-                        updateOutput();
-                        setTimeout(() => scanning = false, 3000);
+                        beepSound.play(); // Riproduci il suono
+                        qrCodes.unshift(result.text); // Aggiungi il risultato all'inizio dell'array
+                        updateOutput(); // Aggiorna il contenuto dell'output
+                        setTimeout(() => scanning = false, 3000); // Riprendi la scansione dopo 3 secondi
                     }
-                    if (err) {
-                        if (err instanceof ZXing.NotFoundException) {
-                            console.log("Nessun QR code trovato in questo frame.");
-                        } else {
-                            console.error("Errore nella scansione del codice QR:", err);
-                        }
+                    if (err && !(err instanceof ZXing.NotFoundException)) {
+                        // Nascondi il messaggio di errore, gestisci solo log
+                        console.error("Errore nella scansione del codice QR:", err);
                     }
                 }).catch(err => {
                     console.error("Errore nella decodifica dal dispositivo video:", err);
@@ -132,14 +102,15 @@
 
         function updateOutput() {
             const outputElement = document.getElementById('output');
-            outputElement.innerHTML = '';
+            outputElement.innerHTML = ''; // Clear the current content
             qrCodes.forEach((code, index) => {
                 const div = document.createElement('div');
                 div.className = 'qr-text';
-                div.textContent = `${qrCodes.length - index}. ${code}`;
+                div.textContent = `${index + 1}. ${code}`;
                 outputElement.appendChild(div);
             });
         }
     </script>
 </body>
 </html>
+
