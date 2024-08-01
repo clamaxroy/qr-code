@@ -21,7 +21,7 @@
             height: 220px;
             border: 2px solid #4CAF50;
             margin-bottom: 20px;
-            object-fit: cover; /* Ensures the video fits within the given dimensions */
+            object-fit: cover;
         }
         #output {
             padding: 20px;
@@ -52,12 +52,12 @@
     <button id="startButton">Attiva Fotocamera</button>
     <video id="video" playsinline></video>
     <div id="output">Scansiona un codice QR...</div>
-    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio> <!-- Recupera il suono dal link online -->
+    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
 
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
-        const qrCodes = []; // Array per salvare i testi dei QR code
-        let scanning = false; // Flag per controllare lo stato della scansione
+        const qrCodes = [];
+        let scanning = false;
 
         document.getElementById('startButton').addEventListener('click', async () => {
             const constraints = {
@@ -78,17 +78,16 @@
                 console.log("Inizio scansione QR code");
                 codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
                     if (result && !scanning) {
-                        scanning = true; // Imposta la scansione in pausa
+                        scanning = true;
                         console.log("QR code rilevato:", result.text);
-                        beepSound.play(); // Riproduci il suono
-                        navigator.vibrate(200); // Attiva la vibrazione per 200 ms
-                        qrCodes.unshift(result.text); // Aggiungi il risultato all'inizio dell'array
-                        updateOutput(); // Aggiorna il contenuto dell'output
-                        setTimeout(() => scanning = false, 3000); // Riprendi la scansione dopo 3 secondi
+                        beepSound.play();
+                        navigator.vibrate(200);
+                        qrCodes.unshift(result.text);
+                        updateOutput();
+                        setTimeout(() => scanning = false, 3000);
                     }
                     if (err) {
                         if (err instanceof ZXing.NotFoundException) {
-                            // No QR code found in this frame, it's not an error
                             console.log("Nessun QR code trovato in questo frame.");
                         } else {
                             console.error("Errore nella scansione del codice QR:", err);
@@ -107,7 +106,7 @@
 
         function updateOutput() {
             const outputElement = document.getElementById('output');
-            outputElement.innerHTML = ''; // Clear the current content
+            outputElement.innerHTML = '';
             qrCodes.forEach((code, index) => {
                 const div = document.createElement('div');
                 div.className = 'qr-text';
@@ -118,3 +117,4 @@
     </script>
 </body>
 </html>
+
