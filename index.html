@@ -52,12 +52,14 @@
     <button id="startButton">Attiva Fotocamera</button>
     <video id="video" playsinline></video>
     <div id="output">Scansiona un codice QR...</div>
-    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio>
+    <audio id="beepSound" src="https://static.wixstatic.com/mp3/2080b2_c6773d3d6ddb4e7b8ce364f94c34a882.mp3
+"></audio>
 
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
         const qrCodes = [];
         let scanning = false;
+        let codeReader;
 
         document.getElementById('startButton').addEventListener('click', async () => {
             const constraints = {
@@ -71,7 +73,12 @@
                 const videoElement = document.getElementById('video');
                 videoElement.srcObject = stream;
 
-                const codeReader = new ZXing.BrowserQRCodeReader();
+                if (codeReader) {
+                    codeReader.reset();
+                } else {
+                    codeReader = new ZXing.BrowserQRCodeReader();
+                }
+
                 const outputElement = document.getElementById('output');
                 const beepSound = document.getElementById('beepSound');
 
@@ -117,4 +124,3 @@
     </script>
 </body>
 </html>
-
