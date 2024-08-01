@@ -52,7 +52,7 @@
     <button id="startButton">Attiva Fotocamera</button>
     <video id="video" playsinline></video>
     <div id="output">Scansiona un codice QR...</div>
-    <audio id="beepSound" src="https://static.wixstatic.com/mp3/2080b2_c6773d3d6ddb4e7b8ce364f94c34a882.mp3"></audio> <!-- Recupera il suono dal link online -->
+    <audio id="beepSound" src="https://www.soundjay.com/button/beep-07.wav"></audio> <!-- Recupera il suono dal link online -->
 
     <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
@@ -86,9 +86,13 @@
                         updateOutput(); // Aggiorna il contenuto dell'output
                         setTimeout(() => scanning = false, 3000); // Riprendi la scansione dopo 3 secondi
                     }
-                    if (err && !(err instanceof ZXing.NotFoundException)) {
-                        // Nascondi il messaggio di errore, gestisci solo log
-                        console.error("Errore nella scansione del codice QR:", err);
+                    if (err) {
+                        if (err instanceof ZXing.NotFoundException) {
+                            // No QR code found in this frame, it's not an error
+                            console.log("Nessun QR code trovato in questo frame.");
+                        } else {
+                            console.error("Errore nella scansione del codice QR:", err);
+                        }
                     }
                 }).catch(err => {
                     console.error("Errore nella decodifica dal dispositivo video:", err);
