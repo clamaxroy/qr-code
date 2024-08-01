@@ -74,7 +74,7 @@
                     if (result) {
                         beepSound.play(); // Riproduci il suono
                         qrCodes.unshift(result.text); // Aggiungi il risultato all'inizio dell'array
-                        outputElement.textContent = qrCodes.join('\n'); // Aggiorna il contenuto dell'output
+                        updateOutput(); // Aggiorna il contenuto dell'output
                     }
                     if (err) {
                         if (err instanceof ZXing.NotFoundException) {
@@ -95,6 +95,16 @@
                 document.getElementById('output').textContent = 'Errore nell\'attivazione della fotocamera.';
             }
         });
+
+        function updateOutput() {
+            const outputElement = document.getElementById('output');
+            outputElement.innerHTML = '';
+            qrCodes.forEach((code, index) => {
+                const div = document.createElement('div');
+                div.textContent = `${index + 1}. ${code}`;
+                outputElement.appendChild(div);
+            });
+        }
     </script>
 </body>
 </html>
