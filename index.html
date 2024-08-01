@@ -74,8 +74,10 @@
                 const outputElement = document.getElementById('output');
                 const beepSound = document.getElementById('beepSound');
 
+                console.log("Inizio scansione QR code");
                 codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
                     if (result) {
+                        console.log("QR code rilevato:", result.text);
                         beepSound.play(); // Riproduci il suono
                         qrCodes.unshift(result.text); // Aggiungi il risultato all'inizio dell'array
                         updateOutput(); // Aggiorna il contenuto dell'output
@@ -85,7 +87,7 @@
                             // No QR code found in this frame, it's not an error
                             console.log("Nessun QR code trovato in questo frame.");
                         } else {
-                            console.error(err);
+                            console.error("Errore nella scansione del codice QR:", err);
                             outputElement.textContent = 'Errore nella scansione del codice QR. Riprova.';
                         }
                     }
