@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web App Fotocamera</title>
+    <title>Web App Scanner QR Code</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -11,57 +11,49 @@
             margin: 0;
             padding: 20px;
         }
-        #video {
+        #qr-reader {
             width: 100%;
-            height: auto;
         }
-        #canvas {
-            display: none;
-        }
-        #photo {
+        #qr-result {
             margin-top: 20px;
+            font-size: 1.2em;
+            color: green;
         }
     </style>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
-    <h1>Scatta una Foto</h1>
-    <video id="video" autoplay></video>
-    <button id="snap">Scatta Foto</button>
-    <canvas id="canvas"></canvas>
-    <img id="photo" alt="La tua foto apparirà qui">
+    <h1>Scanner QR Code</h1>
+    <div id="qr-reader"></div>
+    <div id="qr-result">Il testo decodificato apparirà qui</div>
 
     <script>
-        // Accesso alla fotocamera
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const photo = document.getElementById('photo');
-        const snap = document.getElementById('snap');
-        const constraints = {
-            video: {
-                facingMode: { exact: "environment" }
-            }
-        };
-
-        async function startCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                video.srcObject = stream;
-            } catch (err) {
-                console.error('Errore: ', err);
-            }
+        function onScanSuccess(decodedText, decodedResult) {
+            // Handle the decoded text
+            document.getElementById('qr-result').innerText = `Decodificato: ${decodedText}`;
         }
 
-        // Scatta foto
-        snap.addEventListener('click', () => {
-            const context = canvas.getContext('2d');
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            const data = canvas.toDataURL('image/png');
-            photo.setAttribute('src', data);
-        });
+        function onScanFailure(error) {
+            // Handle scan failure, usually better to ignore and keep scanning.
+            console.warn(`Errore di scansione: ${error}`);
+        }
 
-        window.addEventListener('load', startCamera);
+        let html5QrCode = new Html5Qrcode("qr-reader");
+        const config = { fps: 10, qrbox: 250 };
+
+        // If you want to prefer the back camera
+        const qrCodeScannerConfig = {
+            facingMode: "environment"
+        };
+
+        html5QrCode.start(
+            qrCodeScannerConfig,
+            config,
+            onScanSuccess,
+            onScanFailure
+        ).catch(err => {
+            console.error(`Impossibile avviare il codice QR scanner: ${err}`);
+        });
     </script>
 </body>
 </html>
