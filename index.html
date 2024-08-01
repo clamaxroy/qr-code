@@ -3,56 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Web App Scanner QR Code</title>
+    <title>Scanner QR Code</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            text-align: center;
+            background-color: #f0f0f0;
             margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        #video {
+            width: 80%;
+            height: auto;
+            border: 2px solid #4CAF50;
+            margin-bottom: 20px;
+        }
+        #output {
             padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            width: 80%;
+            text-align: center;
         }
-        #qr-reader {
-            width: 100%;
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
-        #qr-result {
-            margin-top: 20px;
-            font-size: 1.2em;
-            color: green;
+        button:hover {
+            background-color: #45a049;
         }
     </style>
-    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
 </head>
 <body>
     <h1>Scanner QR Code</h1>
-    <div id="qr-reader"></div>
-    <div id="qr-result">Il testo decodificato apparirà qui</div>
+    <button id="startButton">Attiva Fotocamera</button>
+    <video id="video" playsinline></video>
+    <div id="output">Scansiona un codice QR...</div>
 
+    <script src="https://unpkg.com/@zxing/library@latest"></script>
     <script>
-        function onScanSuccess(decodedText, decodedResult) {
-            // Handle the decoded text
-            document.getElementById('qr-result').innerText = `Decodificato: ${decodedText}`;
-        }
+        document.getElementById('startButton').addEventListener('click', async () => {
+            const constraints = {
+                video: {
+                    facingMode: { exact: "environment" }
+                }
+            };
 
-        function onScanFailure(error) {
-            // Handle scan failure, usually better to ignore and keep scanning.
-            console.warn(`Errore di scansione: ${error}`);
-        }
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                const videoElement = document.getElementById('video');
+                videoElement.srcObject = stream;
 
-        let html5QrCode = new Html5Qrcode("qr-reader");
-        const config = { fps: 10, qrbox: 250 };
+                const codeReader = new ZXing.BrowserQRCodeReader();
+                const outputElement = document.getElementById('output');
 
-        // If you want to prefer the back camera
-        const qrCodeScannerConfig = {
-            facingMode: "environment"
-        };
+                codeReader.decodeFromVideoDevice(null, 'video', (result, err) => {
+                    if (result) {
+                        console.log("Risultato trovato:", result);
+                        outputElement.textContent = result.text;
+                    }
+                    if (err) {
+                        if (err instanceof ZXing.NotFoundException) {
+                            // No QR code found in this frame, it's not an error
+                            console.log("Nessun QR code trovato in questo frame.");
+                        } else {
+                            console.error(err);
+                            outputElement.textContent = 'Errore nella scansione del codice QR. Riprova.';
+                        }
+                    }
+                }).catch(err => {
+                    console.error("Errore nella decodifica dal dispositivo video:", err);
+                    outputElement.textContent = 'Errore nella configurazione dello scanner QR.';
+                });
 
-        html5QrCode.start(
-            qrCodeScannerConfig,
-            config,
-            onScanSuccess,
-            onScanFailure
-        ).catch(err => {
-            console.error(`Impossibile avviare il codice QR scanner: ${err}`);
+            } catch (error) {
+                console.error('Errore nell\'attivazione della fotocamera:', error);
+                document.getElementById('output').textContent = 'Errore nell\'attivazione della fotocamera.';
+            }
         });
     </script>
 </body>
