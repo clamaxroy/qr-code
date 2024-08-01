@@ -171,6 +171,11 @@
         #photo {
             margin-top: 20px;
         }
+        #reader {
+            width: 100%;
+            height: 300px;
+            margin-top: 20px;
+        }
     </style>
 </head>
 <body>
@@ -206,6 +211,8 @@
     <button id="snap">Scatta Foto</button>
     <canvas id="canvas"></canvas>
     <img id="photo" alt="La tua foto apparirà qui">
+
+    <div id="reader"></div>
 
     <audio id="notificationSound" src="https://static.wixstatic.com/mp3/2080b2_c6773d3d6ddb4e7b8ce364f94c34a882.mp3"></audio>
 
@@ -440,7 +447,7 @@
         // Scansione del QR code
         const html5QrCode = new Html5Qrcode("reader");
         html5QrCode.start(
-            { facingMode: "environment" }, // Preferenze fotocamera
+            { facingMode: { exact: "environment" } }, // Fotocamera posteriore
             {
                 fps: 10, // Frame per secondo per la scansione QR
                 qrbox: 250 // Dimensioni della finestra di scansione
@@ -461,4 +468,3 @@
     </script>
 </body>
 </html>
-
